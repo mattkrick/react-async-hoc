@@ -35,9 +35,16 @@ const statelessComponent = (props) => {
 }
 
 const stripeCb = () => {
-  window.Stripe.setPublishableKey(stripeKey);
+  const stripe = window.Stripe;
+  stripe.setPublishableKey(stripeKey);
   return {
-    stripe: window.Stripe
+    stripe,
+    // example of returning a promisified method when the API doesn't follow a node standard callback
+    createToken: (fields) => new Promise((resolve) => {
+      stripe.card.createToken(fields, (status, response) => {
+        resolve(response);
+      })
+    })
   };
 };
 
