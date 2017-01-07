@@ -10,6 +10,7 @@ and giving it to you in props instead of `window`.
 Some 3rd party vendors don't make npm packages for their scripts & you must load them from a url.
 This really sucks, but it's usually to comply with regulations (Stripe.js, ReCaptcha, etc.)
 For example, with Stripe, instead of adding a script tag, you can use this & then get `window.Stripe` as a prop.
+You can also return a method (or a promisified method) instead of the whole global object.
 Yay modularity & lazy loading!
 
 ##Usage
@@ -21,22 +22,37 @@ Example:
 ```js
 import withAsync from 'react-async-hoc';
 const statelessComponent = (props) => {
-  const {Stripe} = props;
-  if (Stripe === undefined) {
-    return <FetchingScript/>
-  }
-  if (Stripe === null) {
+  const {stripe} = props;
+  // undefined if the script hasn't loaded yet
+  if (!stripe) {
     return <Loading/>
   }
 
   onEventHandler = () => {
-    Stripe.stealMoney();
+    stripe.stealMoney();
   }
   return <div onClick={onEventHandler}>I can haz?</div>
 }
-return withAsync({Stripe: 'https://js.stripe.com/v2/'});
+
+const stripeCb = () => {
+  window.Stripe.setPublishableKey(stripeKey);
+  return {
+    stripe: window.Stripe
+  };
+};
+
+return withAsync({'https://js.stripe.com/v2/': stripeCb});
 ```
 
+##API
+
+```
+withAsync(fetchScripts)
+
+- `fetchScripts`: An object containing all the scripts you want to fetch.
+If you don't know this until runtime, have the parent component pass in a `fetchScripts` property.
+  - `key`: the url of the script to fetch
+  - `value`: the callback to run one that script has been loaded
 
 ## License
 

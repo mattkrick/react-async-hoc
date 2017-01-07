@@ -10,34 +10,37 @@ const loadUrl = (url) => new Promise((resolve, reject) => {
   document.head.appendChild(script);
 });
 
-const global = {};
+const requestedUrls = new Set();
+const globalProps = {};
 
-export default exposedGlobals => ComposedComponent => {
+export default fetchScripts => ComposedComponent => {
   return class WithAsync extends Component {
     componentDidMount() {
-      if (typeof window !== 'undefined') {
-        const globalNames = Object.keys(exposedGlobals);
-        for (let i = 0; i < globalNames.length; i++) {
-          const globalName = globalNames[i];
-          if (!global.hasOwnProperty(globalName)) {
-            const url = exposedGlobals[globalName];
-            global[globalName] = null;
-            loadUrl(url)
-              .then(() => {
-                global[globalName] = window[globalName];
-                this.forceUpdate();
-              })
-              .catch((e) => {
-                console.error(`Failed loading async script ${globalName} from ${url}: ${e}`);
-              })
-          }
-        }
+      if (typeof window === 'undefined') return;
+      const scriptsToFetch = fetchScripts || this.props.fetchScripts;
+      const urls = Object.keys(scriptsToFetch);
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+        if (requestedUrls.has(url)) continue;
+        requestedUrls.add(url);
+        loadUrl(url)
+          .then(() => {
+            const cb = fetchScripts[url];
+            const newProps = cb();
+            if (typeof newProps === 'object') {
+              Object.assign(globalProps, newProps);
+              this.forceUpdate();
+            }
+          })
+          .catch((e) => {
+            console.error(`Failed loading async script from ${url}: ${e}`);
+          })
       }
     }
 
     render() {
       return (
-        <ComposedComponent {...this.props} {...global}/>
+        <ComposedComponent {...this.props} {...globalProps}/>
       );
     }
   }
