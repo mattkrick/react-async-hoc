@@ -28,7 +28,7 @@ export default exposedGlobals => ComposedComponent => {
             loadUrl(url)
               .then(() => {
                 global[globalName] = window[globalName];
-                delete window[globalName];
+                this.forceUpdate();
               })
               .catch((e) => {
                 console.error(`Failed loading async script ${globalName} from ${url}: ${e}`);
