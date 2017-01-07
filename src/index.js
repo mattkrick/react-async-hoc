@@ -11,12 +11,9 @@ const loadUrl = (url) => new Promise((resolve, reject) => {
 });
 
 const global = {};
+
 export default exposedGlobals => ComposedComponent => {
   return class WithAsync extends Component {
-    constructor(props) {
-      super(props);
-    }
-
     componentDidMount() {
       if (typeof window !== 'undefined') {
         const globalNames = Object.keys(exposedGlobals);
