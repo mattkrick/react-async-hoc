@@ -55,11 +55,15 @@ return withAsync({'https://js.stripe.com/v2/': stripeCb});
 
 ```
 withAsync(fetchScripts)
+```
 
 - `fetchScripts`: An object containing all the scripts you want to fetch.
 If you don't know this until runtime, have the parent component pass in a `fetchScripts` property.
+Pass in as many scripts as you want to load.
   - `key`: the url of the script to fetch
   - `value`: the callback to run one that script has been loaded
+
+
 
 ## License
 
