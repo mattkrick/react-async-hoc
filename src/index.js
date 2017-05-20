@@ -21,54 +21,49 @@ const loadCSS = (url) => new Promise((resolve, reject) => {
 });
 
 const requestedUrls = new Set();
-const globalProps = {};
 
 export default ({fetchScripts, fetchStyles}) => ComposedComponent => {
   return class WithAsync extends Component {
+
+    state = {};
+
+    loopUrls = (type) => {
+      const obj = type === 'script' ? fetchScripts : fetchStyles;
+      const loader = type === 'script' ? loadJS : loadCSS;
+      const urls = Object.keys(obj);
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+        if (requestedUrls.has(url)) continue;
+        requestedUrls.add(url);
+        loader(url)
+          .then(() => {
+            const cb = obj[url];
+            const newProps = cb();
+            if (typeof newProps === 'object') {
+              this.setState(newProps);
+            }
+          })
+          .catch((e) => {
+            console.error(`Failed loading async ${type} from ${url}: ${e}`);
+          })
+      }
+    };
+
     componentDidMount() {
       if (typeof window === 'undefined') return;
       const scriptsToFetch = fetchScripts || this.props.fetchScripts;
       const stylesToFetch = fetchStyles || this.props.fetchStyles;
       if (scriptsToFetch) {
-        const urls = Object.keys(scriptsToFetch);
-        for (let i = 0; i < urls.length; i++) {
-          const url = urls[i];
-          if (requestedUrls.has(url)) continue;
-          requestedUrls.add(url);
-          loadJS(url)
-            .then(() => {
-              const cb = fetchScripts[url];
-              const newProps = cb();
-              if (typeof newProps === 'object') {
-                Object.assign(globalProps, newProps);
-                this.forceUpdate();
-              }
-            })
-            .catch((e) => {
-              console.error(`Failed loading async script from ${url}: ${e}`);
-            })
-        }
+        this.loopUrls('script');
       }
       if (stylesToFetch) {
-        const urls = Object.keys(stylesToFetch);
-        for (let i = 0; i < urls.length; i++) {
-          const url = urls[i];
-          if (requestedUrls.has(url)) continue;
-          requestedUrls.add(url);
-          loadCSS(url)
-            .then(() => {
-              cb()
-            })
-            .catch((e) => {
-              console.error(`Failed loading async styles from ${url}: ${e}`);
-            })
-        }
+        this.loopUrls('css');
       }
     }
 
     render() {
       return (
-        <ComposedComponent {...this.props} {...globalProps}/>
+        <ComposedComponent {...this.props} {...this.state}/>
       );
     }
   }
