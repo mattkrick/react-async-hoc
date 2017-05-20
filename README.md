@@ -1,5 +1,5 @@
 # react-async-hoc
-Load 3rd party scripts from a url in a higher order component
+Load 3rd party scripts and styles from a url in a higher order component
 
 ##Installation
 `yarn add react-async-hoc`
@@ -10,6 +10,7 @@ and giving it to you in props instead of `window`.
 Some 3rd party vendors don't make npm packages for their scripts & you must load them from a url.
 This really sucks, but it's usually to comply with regulations (Stripe.js, ReCaptcha, etc.)
 For example, with Stripe, instead of adding a script tag, you can use this & then get `window.Stripe` as a prop.
+For styles, this might be useful if you're using a 3rd party package that comes with CSS but you prefer CSS-in-JS.
 You can also return a method (or a promisified method) instead of the whole global object.
 Yay modularity & lazy loading!
 
@@ -30,7 +31,7 @@ const statelessComponent = (props) => {
 
   onEventHandler = () => {
     stripe.stealMoney();
-  }
+}
   return <div onClick={onEventHandler}>I can haz?</div>
 }
 
@@ -54,7 +55,7 @@ return withAsync({'https://js.stripe.com/v2/': stripeCb});
 ##API
 
 ```
-withAsync(fetchScripts)
+withAsync(fetchScripts, fetchStyles)
 ```
 
 - `fetchScripts`: An object containing all the scripts you want to fetch.
@@ -62,7 +63,7 @@ If you don't know this until runtime, have the parent component pass in a `fetch
 Pass in as many scripts as you want to load.
   - `key`: the url of the script to fetch
   - `value`: the callback to run one that script has been loaded
-
+- `fetchStyles`: Identical to `fetchScripts`, but for loading CSS.
 
 
 ## License
