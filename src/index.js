@@ -22,7 +22,7 @@ const loadCSS = (url) => new Promise((resolve, reject) => {
 
 const requestedUrls = new Set();
 
-export default ({fetchScripts, fetchStyles}) => ComposedComponent => {
+export default (fetchScripts, fetchStyles) => ComposedComponent => {
   return class WithAsync extends Component {
 
     state = {};
