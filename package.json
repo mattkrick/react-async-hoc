@@ -1,6 +1,6 @@
 {
   "name": "react-async-hoc",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "a hoc for async globals",
   "main": "./lib/index.js",
   "scripts": {
