@@ -33,8 +33,7 @@ export default (fetchScripts, fetchStyles) => ComposedComponent => {
       const urls = Object.keys(obj);
       for (let i = 0; i < urls.length; i++) {
         const url = urls[i];
-        const cachedScript = requestedUrls.get(url);
-        const getScript = cachedScript ? Promise.resolve(cachedScript) : loader(url);
+        const getScript = requestedUrls.has(url) ? Promise.resolve() : loader(url);
         getScript
           .then(() => {
             const cb = obj[url];
