@@ -33,9 +33,9 @@ export default (fetchScripts, fetchStyles) => ComposedComponent => {
       const urls = Object.keys(obj);
       for (let i = 0; i < urls.length; i++) {
         const url = urls[i];
-        if (requestedUrls.has(url)) continue;
-        requestedUrls.add(url);
-        loader(url)
+        const cachedScript = requestedUrls.get(url);
+        const getScript = cachedScript ? Promise.resolve(cachedScript) : loader(url);
+        getScript
           .then(() => {
             const cb = obj[url];
             const newProps = cb();
