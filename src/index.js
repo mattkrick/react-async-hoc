@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 
 const loadJS = (url) => new Promise((resolve, reject) => {
   const script = document.createElement('script');
@@ -23,7 +23,7 @@ const loadCSS = (url) => new Promise((resolve, reject) => {
 const requestedUrls = new Set();
 
 export default (fetchScripts, fetchStyles) => ComposedComponent => {
-  return class WithAsync extends Component {
+  return class WithAsync extends PureComponent {
 
     state = {};
 
@@ -38,6 +38,7 @@ export default (fetchScripts, fetchStyles) => ComposedComponent => {
           .then(() => {
             const cb = obj[url];
             const newProps = cb();
+            requestedUrls.add(url);
             if (typeof newProps === 'object') {
               this.setState(newProps);
             }
